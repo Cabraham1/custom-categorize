@@ -1,6 +1,6 @@
 {
   "name": "custom-categorize",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": " library to categorize data based on custom filtering logic",
   "main": "index.js",
   "scripts": {
