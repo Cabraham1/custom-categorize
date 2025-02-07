@@ -20,11 +20,15 @@ You can install **custom-categorize** via npm or Yarn:
 ```bash
 npm install custom-categorize
 yarn add custom-categorize
+```
 
-Usage
+## Usage
+
 Below is a basic example demonstrating how to use the library. This example categorizes an array of user data by language.
 
-Example
+### Example
+
+```bash
 import { categorize } from 'custom-categorize'; // For ES Modules
 
 // or if you are not using ES Modules
@@ -103,12 +107,15 @@ const users = [
 ];
 
 const selectedFilters = ["en"];
-const groupName = "language";
+const targetName = "language";
 
-const result = categorize(users, selectedFilters, groupName);
+const result = categorize(users, selectedFilters, targetName);
 console.log(JSON.stringify(result, null, 2));
+```
 
 When you run the above code, the output will group the data based on the language property. You might see output similar to:
+
+```json
 {
   "en": {
     "data": [ ... ],
@@ -118,13 +125,16 @@ When you run the above code, the output will group the data based on the languag
     "pageCount": 1
   }
 }
+```
 
-Custom Filtering
+### Custom Filtering
+
 If you need more advanced filtering logic, you can pass your own custom filter function as the fourth parameter:
 
-const customFilter = (card, category, groupName) => {
+```bash
+const customFilter = (card, category, targetName) => {
   // Example: Case-insensitive match for language
-  if (groupName === "language") {
+  if (targetName === "language") {
     return card.language.toLowerCase() === category.toLowerCase();
   }
   return false;
@@ -132,25 +142,33 @@ const customFilter = (card, category, groupName) => {
 
 const result = categorize(users, selectedFilters, "language", customFilter);
 console.log(result);
+```
 
-API Reference
-categorize(users, selectedFilters, groupName, [filterFn])
-Parameters:
+## API Reference
 
-users (Array): An array of user objects. Each object should include a data array and may include pagination info such as total, count, page, and pageCount.
-selectedFilters (Array<string>): An array of category filters (e.g., ["en"], ["active"]).
-groupName (string): The property to group by (for example, "status", "language", "country", or "businessunit").
-filterFn ((card, category, groupName) => boolean, optional): A custom filter function. If omitted, the default filter logic is used.
-Returns:
+```bash
+categorize(users, selectedFilters, targetName, [filterFn])
+```
+
+**Parameters:**
+
+- `users` (Array): An array of user objects. Each object should include a data array and may include pagination info such as total, count, page, and pageCount.
+- `selectedFilters` (Array<string>): An array of category filters (e.g., ["en"], ["active"]).
+- `targetName` (string): The property to group by (for example, "status", "language", "country", or "businessunit").
+- `filterFn` ((card, category, targetName) => boolean, optional): A custom filter function. If omitted, the default filter logic is used.
+
+**Returns:**
+
 An object where each key is a filter from selectedFilters and its value is an object containing:
 
-data: The array of filtered user objects.
-total, count, page, pageCount: Aggregated pagination data.
+- `data`: The array of filtered user objects.
+- `total`, `count`, `page`, `pageCount`: Aggregated pagination data.
 
-Contributing
+## Contributing
+
 Contributions are highly appreciated! If you’d like to contribute, please follow these steps:
 
-Fork the repository.
-Create a new branch for your feature or bug fix.
-Write tests to cover your changes.
-Submit a pull request with a detailed description of your changes.
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Write tests to cover your changes.
+4. Submit a pull request with a detailed description of your changes.

@@ -76,14 +76,10 @@ const users = [
         work: "london",
       },
     ],
-    total: 10,
-    count: 10,
-    page: 1,
-    pageCount: 1,
   },
 ];
 const selectedFilters = ["london", "tokyo", "mbl", "toronto"];
-const groupName = "work";
+const targetName = "work";
 
-const result = categorize(users, selectedFilters, groupName);
+const result = categorize(users, selectedFilters, targetName);
 console.log(JSON.stringify(result, null, 2));

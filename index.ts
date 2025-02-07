@@ -3,23 +3,25 @@ import { ILeadBoardGroupedData } from "./utils/constant";
 export type FilterFunction = (
   card: any,
   category: string,
-  groupName: string
+  targetName: string
 ) => boolean;
 
 export const categorize = (
-  users: {
-    data: [];
-    total?: number;
-    count?: number;
-    page?: number;
-    pageCount?: number;
-  }[],
+  users:
+    | {
+        data: [];
+        total?: number;
+        count?: number;
+        page?: number;
+        pageCount?: number;
+      }[]
+    | any[],
   selectedFilters: string[],
-  groupName: string,
+  targetName: string,
   filterFn?: FilterFunction
 ): ILeadBoardGroupedData => {
-  const defaultFilterFn: FilterFunction = (card, category, groupName) => {
-    return card?.[groupName] === category;
+  const defaultFilterFn: FilterFunction = (card, category, targetName) => {
+    return card?.[targetName] === category;
   };
 
   const fn = filterFn || defaultFilterFn;
@@ -28,7 +30,7 @@ export const categorize = (
     const filteredUsers = users
       .map((item) => ({
         ...item,
-        data: item.data.filter((card) => fn(card, category, groupName)),
+        data: item.data.filter((card: any) => fn(card, category, targetName)),
       }))
       .filter((item) => item.data.length > 0);
 
