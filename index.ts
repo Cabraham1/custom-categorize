@@ -1,32 +1,14 @@
-// index.ts (if using TypeScript)
-export interface ILeadBoardGroupedUser {
-  userStatus?: { status: string };
-  country?: string;
-  language?: string;
-  businessUnit?: { name: string };
-  // ... other properties as needed
-}
+import { ILeadBoardGroupedData } from "./utils/constant";
 
-export interface ILeadBoardGroupedData {
-  [category: string]: {
-    data: ILeadBoardGroupedUser[];
-    total?: number;
-    count?: number;
-    page?: number;
-    pageCount?: number;
-  };
-}
-
-// If you want to allow custom filtering, accept an optional filter function
 export type FilterFunction = (
-  card: ILeadBoardGroupedUser,
+  card: any,
   category: string,
   groupName: string
 ) => boolean;
 
 export const categorize = (
   users: {
-    data: ILeadBoardGroupedUser[];
+    data: [];
     total?: number;
     count?: number;
     page?: number;
@@ -36,20 +18,8 @@ export const categorize = (
   groupName: string,
   filterFn?: FilterFunction
 ): ILeadBoardGroupedData => {
-  // Default filter function if none is provided
   const defaultFilterFn: FilterFunction = (card, category, groupName) => {
-    switch (groupName) {
-      case "status":
-        return card?.userStatus?.status === category;
-      case "country":
-        return card?.country === category;
-      case "language":
-        return card?.language === category;
-      case "businessunit":
-        return card?.businessUnit?.name === category;
-      default:
-        return false;
-    }
+    return card?.[groupName] === category;
   };
 
   const fn = filterFn || defaultFilterFn;

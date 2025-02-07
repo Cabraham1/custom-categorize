@@ -22,21 +22,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.categorize = void 0;
 var categorize = function (users, selectedFilters, groupName, filterFn) {
-    // Default filter function if none is provided
     var defaultFilterFn = function (card, category, groupName) {
-        var _a, _b;
-        switch (groupName) {
-            case "status":
-                return ((_a = card === null || card === void 0 ? void 0 : card.userStatus) === null || _a === void 0 ? void 0 : _a.status) === category;
-            case "country":
-                return (card === null || card === void 0 ? void 0 : card.country) === category;
-            case "language":
-                return (card === null || card === void 0 ? void 0 : card.language) === category;
-            case "businessunit":
-                return ((_b = card === null || card === void 0 ? void 0 : card.businessUnit) === null || _b === void 0 ? void 0 : _b.name) === category;
-            default:
-                return false;
-        }
+        return (card === null || card === void 0 ? void 0 : card[groupName]) === category;
     };
     var fn = filterFn || defaultFilterFn;
     return selectedFilters.reduce(function (acc, category) {
