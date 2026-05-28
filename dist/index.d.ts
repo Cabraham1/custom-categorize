@@ -1,9 +1,3 @@
-import { ILeadBoardGroupedData } from "./utils/constant";
-export type FilterFunction = (card: any, category: string, groupName: string) => boolean;
-export declare const categorize: (users: {
-    data: [];
-    total?: number;
-    count?: number;
-    page?: number;
-    pageCount?: number;
-}[], selectedFilters: string[], groupName: string, filterFn?: FilterFunction) => ILeadBoardGroupedData;
+export { categorize } from "./categorize";
+export { categorizePages } from "./categorizePages";
+export type { CategorizeOptions, Grouped, GroupedPage, GroupedPages, KeyResolver, Page, } from "./types";

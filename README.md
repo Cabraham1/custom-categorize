@@ -1,174 +1,173 @@
 # custom-categorize
 
 [![npm version](https://img.shields.io/npm/v/custom-categorize.svg)](https://www.npmjs.com/package/custom-categorize)
-[![License: ISC](https://img.shields.io/npm/l/custom-categorize.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Overview
+A tiny, zero-dependency library to **group arrays of objects by a key**, a
+**dot-path**, or a **function**. Written in TypeScript.
 
-**custom-categorize** is a lightweight library designed to help you categorize data based on custom filtering logic.  
-Built with flexibility in mind, the library offers:
-- **Default filtering:** Use built-in logic for common grouping scenarios.
-- **Custom filtering:** Pass your own filter function to tailor the categorization process to your data.
-- **TypeScript support:** Written in TypeScript for type safety and better developer experience.
+```ts
+import { categorize } from "custom-categorize";
 
-This library is ideal for projects where you need to process and group data dynamically, such as dashboards, reporting tools, or any application that handles large datasets.
+categorize(users, "language");
+categorize(users, "userStatus.status");
+categorize(users, (u) => u.tags);             // multi-bucket (array return)
+categorize(users, "country", { only: ["USA", "UK"] });
+```
 
-## Installation
+---
 
-You can install **custom-categorize** via npm or Yarn:
+## Install
 
 ```bash
 npm install custom-categorize
+# or
 yarn add custom-categorize
 ```
 
-## Usage
+---
 
-Below is a basic example demonstrating how to use the library. This example categorizes an array of user data by language.
+## Quick start
 
-### Example
-
-```bash
-import { categorize } from 'custom-categorize'; // For ES Modules
-
-// or if you are not using ES Modules
-
-// const { categorize } = require('custom-categorize'); // For CommonJS
+```ts
+import { categorize } from "custom-categorize";
 
 const users = [
-  {
-    data: [
-      {
-        userStatus: { status: "active" },
-        country: "USA",
-        language: "en",
-        businessUnit: { name: "Sales" },
-      },
-      {
-        userStatus: { status: "run" },
-        country: "USA",
-        language: "en",
-        businessUnit: { name: "Marketing" },
-      },
-      {
-        userStatus: { status: "active" },
-        country: "Nigeria",
-        language: "pt",
-        businessUnit: { name: "Sales" },
-      },
-      {
-        userStatus: { status: "inactive" },
-        country: "Canada",
-        language: "fr",
-        businessUnit: { name: "Support" },
-      },
-      {
-        userStatus: { status: "active" },
-        country: "Germany",
-        language: "de",
-        businessUnit: { name: "Engineering" },
-      },
-      {
-        userStatus: { status: "inactive" },
-        country: "India",
-        language: "hi",
-        businessUnit: { name: "HR" },
-      },
-      {
-        userStatus: { status: "active" },
-        country: "Brazil",
-        language: "pt",
-        businessUnit: { name: "Sales" },
-      },
-      {
-        userStatus: { status: "inactive" },
-        country: "Japan",
-        language: "ja",
-        businessUnit: { name: "Marketing" },
-      },
-      {
-        userStatus: { status: "run" },
-        country: "Australia",
-        language: "en",
-        businessUnit: { name: "Support" },
-      },
-      {
-        userStatus: { status: "active" },
-        country: "UK",
-        language: "en",
-        businessUnit: { name: "Engineering" },
-      },
-    ],
-    total: 10,
-    count: 10,
-    page: 1,
-    pageCount: 1,
-  },
+  { name: "Ada",   language: "en", userStatus: { status: "active"   } },
+  { name: "Bisi",  language: "pt", userStatus: { status: "active"   } },
+  { name: "Chen",  language: "en", userStatus: { status: "inactive" } },
 ];
 
-const selectedFilters = ["en"];
-const targetName = "language";
+categorize(users, "language");
+// { en: [Ada, Chen], pt: [Bisi] }
 
-const result = categorize(users, selectedFilters, targetName);
-console.log(JSON.stringify(result, null, 2));
+categorize(users, "userStatus.status");
+// { active: [Ada, Bisi], inactive: [Chen] }
 ```
 
-When you run the above code, the output will group the data based on the language property. You might see output similar to:
+---
 
-```json
+## API
+
+### `categorize(items, key, options?)`
+
+Group items by `key`.
+
+| Param     | Type                                       | Description |
+| --------- | ------------------------------------------ | ----------- |
+| `items`   | `T[]`                                      | Items to group. |
+| `key`     | `string \| (item: T) => unknown`           | Property name, dot-path (`"a.b.c"`), or function. If the function returns an array the item is placed in every returned bucket. |
+| `options` | `CategorizeOptions`                        | See below. |
+
+**Returns:** `Record<string, T[]>` — buckets keyed by the resolved value.
+
+**Options**
+
+| Option              | Type                          | Default        | What it does |
+| ------------------- | ----------------------------- | -------------- | ------------ |
+| `only`              | `(string \| number)[]`        | —              | Only keep these bucket keys. Empty buckets in this list are still returned. |
+| `keyAs`             | `(raw: string) => string`     | —              | Transform bucket keys (e.g. `k => k.toLowerCase()`). |
+| `includeUnmatched`  | `boolean`                     | `false`        | Put items whose resolved value is `null`/`undefined`/filtered-out into an extra bucket. |
+| `unmatchedKey`      | `string`                      | `"_unmatched"` | Name of that extra bucket. |
+
+#### Examples
+
+```ts
+// Whitelist with stable shape (missing keys still come back as empty arrays)
+categorize(users, "language", { only: ["en", "fr"] });
+// { en: [...], fr: [] }
+
+// Normalize keys
+categorize(users, "country", { keyAs: (k) => k.toLowerCase() });
+
+// Multi-bucket via function
+categorize(posts, (p) => p.tags);   // each post lands in every tag bucket
+
+// Capture leftovers
+categorize(users, "language", { only: ["en"], includeUnmatched: true });
+// { en: [...], _unmatched: [...everyone else...] }
+```
+
+---
+
+### `categorizePages(pages, key, options?)`
+
+Convenience helper for paginated payloads of the shape:
+
+```ts
+[{ data: T[], total?, count?, page?, pageCount? }, ...]
+```
+
+Returns one bucket per category with the matching items concatenated and
+pagination counters aggregated:
+
+```ts
 {
-  "en": {
-    "data": [ ... ],
-    "total": 10,
-    "count": 10,
-    "page": 1,
-    "pageCount": 1
+  [bucket: string]: {
+    data: T[];
+    total: number;
+    count: number;
+    page: number;
+    pageCount: number;
   }
 }
 ```
 
-### Custom Filtering
+```ts
+import { categorizePages } from "custom-categorize";
 
-If you need more advanced filtering logic, you can pass your own custom filter function as the fourth parameter:
+const pages = [
+  {
+    data: [
+      { country: "USA", language: "en" },
+      { country: "UK",  language: "en" },
+      { country: "Brazil", language: "pt" },
+    ],
+    total: 3, count: 3, page: 1, pageCount: 1,
+  },
+];
 
-```bash
-const customFilter = (card, category, targetName) => {
-  // Example: Case-insensitive match for language
-  if (targetName === "language") {
-    return card.language.toLowerCase() === category.toLowerCase();
-  }
-  return false;
-};
-
-const result = categorize(users, selectedFilters, "language", customFilter);
-console.log(result);
+categorizePages(pages, "language", { only: ["en"] });
+// {
+//   en: {
+//     data: [{country:"USA",...}, {country:"UK",...}],
+//     total: 3, count: 3, page: 1, pageCount: 1
+//   }
+// }
 ```
 
-## API Reference
+---
 
-```bash
-categorize(users, selectedFilters, targetName, [filterFn])
+## TypeScript
+
+Everything is typed. Public types:
+
+```ts
+import type {
+  CategorizeOptions,
+  Grouped,
+  GroupedPage,
+  GroupedPages,
+  KeyResolver,
+  Page,
+} from "custom-categorize";
 ```
 
-**Parameters:**
+---
 
-- `users` (Array): An array of user objects. Each object should include a data array and may include pagination info such as total, count, page, and pageCount.
-- `selectedFilters` (Array<string>): An array of category filters (e.g., ["en"], ["active"]).
-- `targetName` (string): The property to group by (for example, "status", "language", "country", or "businessunit").
-- `filterFn` ((card, category, targetName) => boolean, optional): A custom filter function. If omitted, the default filter logic is used.
+## Migration from 1.x
 
-**Returns:**
+`1.x` exposed a single `categorize(users, selectedFilters, targetName, filterFn?)`
+that required a paginated wrapper shape. `2.x` is a clean redesign.
 
-An object where each key is a filter from selectedFilters and its value is an object containing:
+| 1.x                                                          | 2.x |
+| ------------------------------------------------------------ | --- |
+| `categorize(pages, ["en"], "language")`                      | `categorizePages(pages, "language", { only: ["en"] })` |
+| `categorize(pages, ["active"], "status", customFn)`          | `categorizePages(pages, item => customFn(item, ...), ...)` or `categorizePages(pages, "userStatus.status", { only: ["active"] })` |
+| Plain array of items                                         | `categorize(items, "language", { only: ["en"] })` |
 
-- `data`: The array of filtered user objects.
-- `total`, `count`, `page`, `pageCount`: Aggregated pagination data.
+---
 
-## Contributing
+## License
 
-Contributions are highly appreciated! If you’d like to contribute, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Write tests to cover your changes.
-4. Submit a pull request with a detailed description of your changes.
+MIT

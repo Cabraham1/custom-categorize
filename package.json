@@ -1,14 +1,33 @@
 {
   "name": "custom-categorize",
-  "version": "1.0.3",
-  "description": " library to categorize data based on custom filtering logic",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Tiny, flexible library to group/categorize arrays by a key, dot-path, or function — with optional paginated-data support.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node test/test.js"
   },
-  "author": "Abraham Chrstopher",
-  "license": "ISC",
+  "keywords": [
+    "categorize",
+    "group",
+    "groupBy",
+    "filter",
+    "categorization",
+    "typescript"
+  ],
+  "author": "Abraham Christopher",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/"
+  },
   "devDependencies": {
     "typescript": "^5.7.3"
   }
